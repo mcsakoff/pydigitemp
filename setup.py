@@ -7,7 +7,7 @@ setup(
     description='Python implementation of 1-Wire protocol',
     author='Alexey McSakoff',
     author_email='mcsakoff@gmail.com',
-    url='https://github.com/mcsakoff/pydigitemp',
+    url='https://github.com/neenar/pydigitemp',
     install_requires=[
         'pyserial',
     ],
