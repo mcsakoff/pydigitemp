@@ -13,17 +13,15 @@ is of interest, when writing, however, the receive byte is discarded. Depending 
 first-out (FIFO) buffer depth, the UART can also frame 1-Wire bits into byte values further reducing the processor
 overhead.
 
-See for details:
-    Using an UART to Implement a 1-Wire Bus Master:
-        http://www.maximintegrated.com/en/app-notes/index.mvp/id/214
-
+For details see:
+    Using an UART to Implement a 1-Wire Bus Master (http://www.maximintegrated.com/en/app-notes/index.mvp/id/214)
 """
 
 import serial
 import fcntl
 
 from .utils import *
-from .exceptions import DeviceError, WriteError
+from .exceptions import DeviceError, AdapterError
 
 
 class UART_Adapter(object):
@@ -94,6 +92,8 @@ class UART_Adapter(object):
         self.clear()
         self.uart.write(b'\xff\xff\xff\xff\xff\xff\xff\xff')
         data = self.uart.read(8)
+        if len(data) != 8:
+            raise AdapterError('Read error')
         value = 0
         for b in reversed(iterbytes(data)):
             value <<= 1
@@ -114,8 +114,10 @@ class UART_Adapter(object):
         self.clear()
         self.uart.write(bits)
         back = self.uart.read(8)
+        if len(back) != 8:
+            raise AdapterError('Write error')
         if bits != back:
-            raise WriteError('Write loopback detected noise on the line.')
+            raise AdapterError('Noise on the line detected')
 
     def read_bit(self):
         """
@@ -128,7 +130,10 @@ class UART_Adapter(object):
         """
         self.clear()
         self.uart.write(b'\xff')
-        value = bord(self.uart.read(1))
+        b = self.uart.read(1)
+        if len(b) != 1:
+            raise AdapterError('Read error')
+        value = bord(b)
         return 0b1 if value == 0xff else 0b0
 
     def write_bit(self, bit):
@@ -144,8 +149,10 @@ class UART_Adapter(object):
         self.clear()
         self.uart.write(bit)
         back = self.uart.read(1)
+        if len(back) != 1:
+            raise AdapterError('Write error')
         if bit != back:
-            raise WriteError('Write loopback detected noise on the line.')
+            raise AdapterError('Noise on the line detected')
 
     def reset(self):
         """
@@ -154,11 +161,14 @@ class UART_Adapter(object):
         self.clear()
         self.uart.setBaudrate(9600)
         self.uart.write(b'\xf0')
-        d = bord(self.uart.read(1))
+        b = self.uart.read(1)
+        if len(b) != 1:
+            raise AdapterError('Read/Write error')
+        d = bord(b)
         self.uart.setBaudrate(115200)
         if d == 0xf0:
             raise DeviceError('No 1-wire device present')
         elif 0x10 <= d <= 0xe0:
             return
         else:
-            raise DeviceError('Presense error: 0x%02x' % d)
+            raise DeviceError('Presence error: 0x%02x' % d)

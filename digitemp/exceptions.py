@@ -2,11 +2,11 @@ class OneWireException(Exception):
     pass
 
 
-class DeviceError(OneWireException):
+class AdapterError(OneWireException):
     pass
 
 
-class WriteError(OneWireException):
+class DeviceError(OneWireException):
     pass
 
 
