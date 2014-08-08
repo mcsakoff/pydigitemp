@@ -22,6 +22,7 @@ Master
 ------
 
   * `DS9097 <http://www.maximintegrated.com/en/products/comms/ibutton/DS9097.html>`_ - COM port adapter which performs RS-232C level conversion.
+  * Custom 1-wire serial port interface (see below).
 
 Slave
 -----
@@ -48,11 +49,17 @@ Usage
   sensor.info()
 
   # get temperature
-  t = sensor.getTemperature()                 # 25.5
-  t = sensor.getTemperature(precise=True)     # 25.48
+  t = sensor.get_temperature()                 # 25.5
+  t = sensor.get_temperature(precise=True)     # 25.48
 
   # find ROM codes for all connected devices:
   print(OneWireDevice(bus).get_connected_ROMs(human_readable=True))
+
+1-wire serial port interface
+============================
+
+See `Serial Port Temperature Sensors - Hardware Interface <http://martybugs.net/electronics/tempsensor/hardware.cgi>`_
+for details.
 
 License
 =======

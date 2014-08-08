@@ -211,7 +211,7 @@ class DS18S20(OneWireDevice):
 
         return temperature
 
-    def getTemperature(self, precise=False, attempts=3):
+    def get_temperature(self, precise=False, attempts=3):
         """
         Initiates a single temperature conversion then read scratchpad memory
         and caculate the temperature.
