@@ -10,11 +10,13 @@ if PY3:
     iterbytes = iter                                            # b'ntp'              => iter([110, 116, 112])
     bord = lambda buf: buf[0]                                   # b'\x01'             => 0x01
     iord = lambda buf, i: buf[i]                                # b'\x05\x06\x07', 1  => 0x06
+    fromhex = lambda s: bytes.fromhex(s)
 else:
     bytesarray2bytes = lambda array: b''.join(map(chr, array))  # [110, 116, 112]     => b'ntp'
     iterbytes = lambda buf: map(ord, buf)                       # b'ntp'              => iter([110, 116, 112])
     bord = ord                                                  # b'\x01'             => 0x01
     iord = lambda buf, i: ord(buf[i])                           # b'\x05\x06\x07', 1  => 0x06
+    fromhex = lambda s: s.decode('hex')
 
 
 def crc8(data):
@@ -34,7 +36,7 @@ def rom2str(rom_code):
 
 
 def str2rom(string):
-    return string.decode('hex')
+    return fromhex(string)
 
 
 def rom2bits(rom_code):

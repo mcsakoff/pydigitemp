@@ -95,7 +95,7 @@ class UART_Adapter(object):
         if len(data) != 8:
             raise AdapterError('Read error')
         value = 0
-        for b in reversed(iterbytes(data)):
+        for b in reversed(list(iterbytes(data))):
             value <<= 1
             if b == 0xff:
                 value += 1
