@@ -11,7 +11,7 @@ class OneWireDevice(object):
     See: http://www.maximintegrated.com/en/app-notes/index.mvp/id/937
     """
     TYPES = {
-        0x10: 'DS1820 / DS18S20 / DS1920 - Temperature Sensor',
+        0x10: 'DS1820 / DS18S20 / DS1920 - High-precision Digital Termometer',
     }
 
     def __init__(self, bus):
@@ -48,8 +48,8 @@ class OneWireDevice(object):
         if parasite_mode:
             time.sleep(0.75)
         else:
-            while self.bus.read_byte() != 0x1:
-                time.sleep(0.05)
+            while self.bus.read_byte() == 0x0:
+                time.sleep(0.0001)
 
     def _power_supply(self):
         """
