@@ -27,15 +27,24 @@ Master
 Slave
 -----
 
-  * `DS1820 / DS18S20 / DS1920 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18S20.html>`_ - Temperature Sensor.
+  * `DS1820 / DS18S20 / DS1920 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18S20.html>`_ - High-Precision Temperature Sensor.
+  * `DS18B20 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18B20.html>`_ - Programmable Resolution Temperature Sensor.
 
 Usage
 =====
 
-::
+Find ROM codes for all connected devices::
 
   from digitemp.master import UART_Adapter
-  from digitemp.device import DS1820, OneWireDevice
+  from digitemp.device import AddressableDevice
+
+  print(AddressableDevice(UART_Adapter(0)).get_connected_ROMs())
+  # ['108739A80208006F', '10A75CA80208001A']
+
+Get temperature::
+
+  from digitemp.master import UART_Adapter
+  from digitemp.device import DS1820
 
   bus = UART_Adapter(0)  # DS9097 connected to COM1 (/dev/ttyS0)
 
@@ -49,11 +58,8 @@ Usage
   sensor.info()
 
   # get temperature
-  t = sensor.get_temperature()                 # 25.5
-  t = sensor.get_temperature(precise=True)     # 25.48
-
-  # find ROM codes for all connected devices:
-  print(OneWireDevice(bus).get_connected_ROMs(human_readable=True))
+  print(sensor.get_temperature(precise=True))
+  # 25.48
 
 1-wire serial port interface
 ============================
