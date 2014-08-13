@@ -108,8 +108,12 @@ class AddressableDevice(OneWireDevice):
                     # ... and proceed with 0
                     current_rom.append(0b0)
                     self.bus.write_bit(0b0)
-                else:
-                    raise OneWireException('Search command got wrong bits (two sequential 0b1)')
+                else:  # b1 == b2 == 1:
+                    if alarm:
+                        # In alarm search that means there is no more alarming devices
+                        return
+                    else:
+                        raise OneWireException('Search command got wrong bits (two sequential 0b1)')
             complete_roms.append(bits2rom(current_rom))
 
         search()
