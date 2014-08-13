@@ -11,6 +11,7 @@ class OneWireDevice(object):
     TYPES = {
         0x01: 'DS2401 - Silicon Serial Number',
         0x10: 'DS18S20 - High-precision Digital Termometer',
+        0x22: 'DS1822 - Econo Digital Termometer',
         0x28: 'DS18B20 - Programmable Resolution Digital Termometer',
     }
 
@@ -18,8 +19,8 @@ class OneWireDevice(object):
         self.bus = bus
 
     @classmethod
-    def _device_name(cls, rom_code):
-        return OneWireDevice.TYPES.get(iord(rom_code, 0), 'Unknown 1-Wire device')
+    def _device_name(cls, family_code):
+        return OneWireDevice.TYPES.get(family_code, 'Unknown 1-Wire device')
 
 
 class AddressableDevice(OneWireDevice):

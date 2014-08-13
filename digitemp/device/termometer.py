@@ -12,6 +12,7 @@ class OneWireTemperatureSensor(AddressableDevice):
     """
     Abstract class for temperature sensors.
     """
+    FAMILY_CODE = 0x00
     T_CONV = 0.750  # temperature conversion time, default value
     T_RW = 0.010    # eeprom write time, default value
 
@@ -34,6 +35,9 @@ class OneWireTemperatureSensor(AddressableDevice):
             self._reset()
             self.parasitic = self._power_supply()
 
+        if iord(self.rom_code, 0) != self.FAMILY_CODE:
+            raise DeviceError('The device is not a %s' % self._device_name(self.FAMILY_CODE))
+
     @property
     def rom(self):
         """
@@ -43,7 +47,7 @@ class OneWireTemperatureSensor(AddressableDevice):
 
     def info(self):
         print('Bus: %s' % self.bus.name)
-        print('Device: %s' % self._device_name(self.rom_code))
+        print('Device: %s' % self._device_name(self.FAMILY_CODE))
         print('ROM Code: %s' % self.rom)
         print('Power Mode: %s' % ('parasitic' if self.parasitic else 'external'))
         print('Connection Mode: %s' % ('single-drop' if self.single_mode else 'multidrop'))
@@ -88,7 +92,7 @@ class OneWireTemperatureSensor(AddressableDevice):
         """
         self._skip_ROM()
         self.bus.write_byte(0x44)
-        # We do not know is there are any DS18B20s on the line and what are their precision settings.
+        # We do not know if there are any DS18B20 or DS1822 on the line and what are their resolution settings.
         # So, we just wait max(T_conv) that is 750ms for currently supported devices.
         time.sleep(self.T_CONV)
 
@@ -174,7 +178,7 @@ class OneWireTemperatureSensor(AddressableDevice):
 
     def _calc_temperature(self, scratchpad):
         """
-        Calculate temperature from scratchpad
+        Calculate temperature from the scratchpad
         """
         raise NotImplementedError()
 
@@ -184,12 +188,13 @@ class DS18S20(OneWireTemperatureSensor):
     Represents one DS18S20 (temperature sensor) connected to the 1-Wire bus.
     See: http://datasheets.maximintegrated.com/en/ds/DS18S20.pdf
     """
+    FAMILY_CODE = 0x10
 
-    def __init__(self, bus, rom=None):
-        OneWireTemperatureSensor.__init__(self, bus, rom)
-        family_code = iord(self.rom_code, 0)
-        if family_code != 0x10:
-            raise DeviceError('The device is not a DS1820/DS18S20/DS1920 Temperature Sensor')
+    def info(self):
+        OneWireTemperatureSensor.info(self)
+        self._reset()
+        scratchpad = self._read_scratchpad()
+        print('Alarms: high = %+d C, low = %+d C' % struct.unpack('bb', scratchpad[2:4]))
 
     @classmethod
     def _calc_temperature(cls, scratchpad, precise=True):
@@ -224,3 +229,95 @@ class DS18S20(OneWireTemperatureSensor):
 
 DS1820 = DS18S20
 DS1920 = DS18S20
+
+
+class DS18B20(OneWireTemperatureSensor):
+    """
+    Represents one DS18B20 (temperature sensor) connected to the 1-Wire bus.
+    See: http://datasheets.maximintegrated.com/en/ds/DS18B20.pdf
+    """
+    FAMILY_CODE = 0x28
+    RES_9_BIT  = 0x0
+    RES_10_BIT = 0x1
+    RES_11_BIT = 0x2
+    RES_12_BIT = 0x3
+
+    def __init__(self, bus, rom=None):
+        OneWireTemperatureSensor.__init__(self, bus, rom)
+        self._set_tconv(self.get_resolution())
+
+    def info(self):
+        OneWireTemperatureSensor.info(self)
+        self._reset()
+        scratchpad = self._read_scratchpad()
+        print('Alarms: high = %+d C, low = %+d C' % struct.unpack('bb', scratchpad[2:4]))
+        print('Resolution: %d bits' % (((iord(scratchpad, 4) >> 5) & 0x3) + 9))
+
+    @classmethod
+    def _calc_temperature(cls, scratchpad):
+        """
+        Extract temerature value from scratchpad.
+
+        :param scratchpad: Scratchpad 8-bytes as bytes.
+        :return: float, temperature in Celcius
+        """
+        resolution = (iord(scratchpad, 4) >> 5) & 0x3
+        temp_register = struct.unpack('<h', scratchpad[0:2])[0]
+        if resolution == DS18B20.RES_12_BIT:
+            temperature = float(temp_register) / 16.0
+        elif resolution == DS18B20.RES_11_BIT:
+            temperature = float(temp_register >> 1) / 8.0
+        elif resolution == DS18B20.RES_10_BIT:
+            temperature = float(temp_register >> 2) / 4.0
+        elif resolution == DS18B20.RES_9_BIT:
+            temperature = float(temp_register >> 3) / 2.0
+        else:
+            raise NotImplementedError()
+        return temperature
+
+    def get_T(self):
+        self._reset()
+        scratchpad = self._read_scratchpad()
+        return struct.unpack('bb', scratchpad[2:4])
+
+    def set_T(self, high=None, low=None):
+        self._reset()
+        scratchpad = self._read_scratchpad()
+        if low is None or high is None:
+            old_high, old_low = struct.unpack('bb', scratchpad[2:4])
+        else:
+            old_high, old_low = -128, 127
+        low = old_low if low is None else low
+        high = old_high if high is None else high
+        self._reset()
+        raw = struct.pack('bbB', high, low, iord(scratchpad, 4))
+        self._write_scratchpad(raw)
+
+    def get_resolution(self):
+        self._reset()
+        scratchpad = self._read_scratchpad()
+        return (iord(scratchpad, 4) >> 5) & 0b11
+
+    def set_resolution(self, resolution):
+        resolution &= 0b11
+        self._reset()
+        scratchpad = self._read_scratchpad()
+        raw = bytesarray2bytes([
+            iord(scratchpad, 2),
+            iord(scratchpad, 3),
+            (resolution << 5) | 0b00011111
+        ])
+        self._reset()
+        self._write_scratchpad(raw)
+        self._set_tconv(resolution)
+
+    def _set_tconv(self, resolution):
+        self.t_conv = self.T_CONV / (8 >> resolution)
+
+
+class DS1822(DS18B20):
+    """
+    Represents one DS1822 (temperature sensor) connected to the 1-Wire bus.
+    See: http://datasheets.maximintegrated.com/en/ds/DS1822.pdf
+    """
+    FAMILY_CODE = 0x22

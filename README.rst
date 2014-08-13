@@ -29,6 +29,7 @@ Slave
 
   * `DS1820 / DS18S20 / DS1920 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18S20.html>`_ - High-Precision Temperature Sensor.
   * `DS18B20 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18B20.html>`_ - Programmable Resolution Temperature Sensor.
+  * `DS1822 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS1822.html>`_ - Econo Temperature Sensor.
 
 Usage
 =====
