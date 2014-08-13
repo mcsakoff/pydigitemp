@@ -82,7 +82,17 @@ class OneWireTemperatureSensor(AddressableDevice):
             print('Temperature sensor (%s) error %s' % (rom2str(self.rom_code), str(e)))
             return None
 
-     # ---[ Function Commands ]----
+    def convert_T_all(self):
+        """
+        This forces all temperature sensors to calculate temperature and set/unset alarm flag.
+        """
+        self._skip_ROM()
+        self.bus.write_byte(0x44)
+        # We do not know is there are any DS18B20s on the line and what are their precision settings.
+        # So, we just wait max(T_conv) that is 750ms for currently supported devices.
+        time.sleep(self.T_CONV)
+
+    # ---[ Function Commands ]----
 
     def _convert_T(self):
         """
@@ -107,8 +117,8 @@ class OneWireTemperatureSensor(AddressableDevice):
     def _write_scratchpad(self, raw):
         """
         WRITE SCRATCHPAD [4Eh]
-        This command allows the master to write data to the slave's scratchpad. Data must be transmitted least
-        significant bit first and all bytes MUST be written before the master issues a reset.
+        This command allows the master to write data to the slave's scratchpad.
+        All bytes MUST be written before the master issues a reset.
         """
         self.bus.write_byte(0x4e)
         self.bus.write_bytes(raw)
@@ -195,6 +205,22 @@ class DS18S20(OneWireTemperatureSensor):
             count_per_c = iord(scratchpad, 7)
             temperature = round(int(temperature) - 0.25 + 1.0 * (count_per_c - count_remain) / count_per_c, 2)
         return temperature
+
+    def get_T(self):
+        self._reset()
+        scratchpad = self._read_scratchpad()
+        return struct.unpack('bb', scratchpad[2:4])
+
+    def set_T(self, high=None, low=None):
+        if low is None or high is None:
+            old_high, old_low = self.get_T()
+        else:
+            old_high, old_low = -128, 127
+        low = old_low if low is None else low
+        high = old_high if high is None else high
+        self._reset()
+        self._write_scratchpad(struct.pack('bb', high, low))
+
 
 DS1820 = DS18S20
 DS1920 = DS18S20
