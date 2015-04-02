@@ -63,7 +63,6 @@ class OneWireTemperatureSensor(AddressableDevice):
         Initiates a single temperature conversion then read scratchpad memory
         and caculate the temperature.
 
-        :param precise: If True - calculate extended resolution temperature
         :param attempts: retry on CRC errors
         :return: float, temperature in Celcius
         """
