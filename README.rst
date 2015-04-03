@@ -59,7 +59,7 @@ Get temperature::
   sensor.info()
 
   # get temperature
-  print(sensor.get_temperature(precise=True))
+  print(sensor.get_temperature())
   # 25.48
 
 1-wire serial port interface
