@@ -39,7 +39,7 @@ Find ROM codes for all connected devices::
   from digitemp.master import UART_Adapter
   from digitemp.device import AddressableDevice
 
-  print(AddressableDevice(UART_Adapter(0)).get_connected_ROMs())
+  print(AddressableDevice(UART_Adapter('/dev/ttyS0')).get_connected_ROMs())
   # ['108739A80208006F', '10A75CA80208001A']
 
 Get temperature::
@@ -47,7 +47,7 @@ Get temperature::
   from digitemp.master import UART_Adapter
   from digitemp.device import DS1820
 
-  bus = UART_Adapter(0)  # DS9097 connected to COM1 (/dev/ttyS0)
+  bus = UART_Adapter('/dev/ttyS0')  # DS9097 connected to COM1
 
   # only one 1-wire device on the bus:
   sensor = DS1820(bus)

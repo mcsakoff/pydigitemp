@@ -9,7 +9,7 @@ setup(
     author_email='mcsakoff@gmail.com',
     url='https://github.com/neenar/pydigitemp',
     install_requires=[
-        'pyserial',
+        'pyserial>=3.0',
     ],
     packages=find_packages(),
     license='Python',

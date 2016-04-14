@@ -30,20 +30,20 @@ class UART_Adapter(object):
         self.locked = False
         self.uart = serial.Serial(port, timeout=timeout)
         self._lock()
-        self.uart.setDTR(True)
+        self.uart.dtr = True
 
     @property
     def name(self):
         return self.uart.name
 
     def close(self):
-        if self.uart.isOpen():
+        if self.uart.is_open:
             self._unlock()
-            self.uart.setDTR(False)
+            self.uart.dtr = False
             self.uart.close()
 
     def _lock(self):
-        if self.uart.isOpen():
+        if self.uart.is_open:
             try:
                 fcntl.flock(self.uart.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
                 self.locked = True
@@ -62,8 +62,8 @@ class UART_Adapter(object):
         """
         Clear imput and output buffers. Just in case.
         """
-        self.uart.flushInput()
-        self.uart.flushOutput()
+        self.uart.reset_input_buffer()
+        self.uart.reset_output_buffer()
 
     def read_bytes(self, size=1):
         """
@@ -159,13 +159,13 @@ class UART_Adapter(object):
         Reset and presense detect.
         """
         self.clear()
-        self.uart.setBaudrate(9600)
+        self.uart.baudrate = 9600
         self.uart.write(b'\xf0')
         b = self.uart.read(1)
         if len(b) != 1:
             raise AdapterError('Read/Write error')
         d = bord(b)
-        self.uart.setBaudrate(115200)
+        self.uart.baudrate = 115200
         if d == 0xf0:
             raise DeviceError('No 1-wire device present')
         elif 0x10 <= d <= 0xe0:
