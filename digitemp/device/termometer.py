@@ -5,8 +5,6 @@ from ..utils import *
 from ..exceptions import OneWireException, CRCError, DeviceError
 from .generic import AddressableDevice
 
-__all__ = ['DS18S20', 'DS1820', 'DS1920']
-
 
 class OneWireTemperatureSensor(AddressableDevice):
     """

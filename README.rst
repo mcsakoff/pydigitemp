@@ -62,6 +62,19 @@ Get temperature::
   print(sensor.get_temperature())
   # 25.48
 
+Set resolution for DS18B20 and DS1822)::
+
+  from digitemp.device import DS18B20
+  sensor = DS18B20(bus)
+
+  sensor.set_resolution(DS18B20.RES_9_BIT)
+
+`digitemp.device` module provides following classes:
+    * `DS18S20` - for DS1820, DS18S20 and DS1920 High-Precision Temperature Sensors (family code: `0x10`);
+    * `DS18B20` - for DS18B20 Programmable Resolution Temperature Sensors (family code: `0x28`);
+    * `DS1822` - for DS1822 Econo Temperature Sensor (family code: `0x22`)
+    * `DS1820`, `DS1920` - are aliases for `DS18S20`
+
 1-wire serial port interface
 ============================
 
