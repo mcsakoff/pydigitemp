@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:cc="http://creativecommons.org/ns#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:svg="http://www.w3.org/2000/svg"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+     xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+     width="325"
+     height="200"
+     id="svg4962"
+     inkscape:version="0.91 r13725"
+     sodipodi:docname="ds18b20-uart-par.svg"
+     version="1.1">
+    <defs
+         id="defs4964" />
+    <sodipodi:namedview
+         id="base"
+         pagecolor="#ffffff"
+         bordercolor="#666666"
+         borderopacity="1.0"
+         inkscape:pageopacity="0.0"
+         inkscape:pageshadow="2"
+         inkscape:zoom="3.562"
+         inkscape:cx="162.5"
+         inkscape:cy="100"
+         inkscape:document-units="px"
+         inkscape:current-layer="layer1"
+         showgrid="true"
+         inkscape:window-width="1267"
+         inkscape:window-height="955"
+         inkscape:window-x="1"
+         inkscape:window-y="1"
+         inkscape:window-maximized="1"
+         fit-margin-top="10"
+         fit-margin-left="10"
+         fit-margin-right="10"
+         fit-margin-bottom="10"
+         inkscape:snap-bbox="true"
+         inkscape:snap-bbox-midpoints="true"
+         inkscape:object-nodes="true">
+        <inkscape:grid
+             type="xygrid"
+             id="grid4970"
+             units="px"
+             empspacing="5"
+             visible="true"
+             enabled="true"
+             snapvisiblegridlinesonly="true"
+             spacingx="5px"
+             spacingy="5px" />
+    </sodipodi:namedview>
+    <metadata
+         id="metadata4967">
+        <rdf:RDF>
+            <cc:Work
+                 rdf:about="">
+                <dc:format>image/svg+xml</dc:format>
+                <dc:type
+                     rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+                <dc:title />
+            </cc:Work>
+        </rdf:RDF>
+    </metadata>
+    <g
+         inkscape:label="Vrstva 1"
+         inkscape:groupmode="layer"
+         id="layer1"
+         style="stroke-linecap:square">
+        <rect
+             rx="5"
+             y="50"
+             x="225"
+             height="125"
+             width="75"
+             id="use5120"
+             style="fill:#8ae234;stroke:black;stroke-linejoin:round"
+             ry="5" />
+        <rect
+             style="fill:#729fcf;stroke:black;stroke-linejoin:round"
+             id="rect4314"
+             width="75"
+             height="125"
+             x="25"
+             y="50"
+             rx="5" />
+        <g
+             id="g7084"
+             transform="matrix(0,-1,1,0,45.3,835.8)">
+            <path
+                 style="fill:white;stroke:black;stroke-width:1.7717;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:7"
+                 d="m 764.6,34.7 c 0,2.1 -1.7,3.7 -3.8,3.7 -2.2,0 -3.7,-1.6 -3.7,-3.7 0,-2.1 1.6,-3.8 3.7,-3.8 2.1,0 3.8,1.7 3.8,3.8 z"
+                 id="path3800"
+                 inkscape:connector-curvature="0" />
+            <path
+                 style="fill:none;stroke:black;stroke-width:1.7717;stroke-miterlimit:7"
+                 d="m 760.8,39.7 0,15"
+                 id="path1117"
+                 inkscape:connector-curvature="0" />
+        </g>
+        <path
+             d="m 178.8,125.1 c 0,2.1 -1.8,3.7 -3.8,3.7 -2.3,0 -3.8,-1.6 -3.8,-3.7 0,-2.1 1.6,-3.9 3.8,-3.9 2,0 3.8,1.8 3.8,3.9 z"
+             id="path3818"
+             inkscape:connector-curvature="0"
+             style="stroke:black" />
+        <use
+             x="0"
+             y="0"
+             xlink:href="#g7084"
+             id="use4250"
+             transform="translate(0,25)"
+             width="100%"
+             height="100%" />
+        <use
+             height="100%"
+             width="100%"
+             transform="translate(0,50)"
+             id="use4254"
+             xlink:href="#g7084"
+             y="0"
+             x="0" />
+        <use
+             x="0"
+             y="0"
+             xlink:href="#g7084"
+             id="use4256"
+             transform="translate(0,75)"
+             width="100%"
+             height="100%" />
+        <text
+             xml:space="preserve"
+             style="font-size:14px;line-height:125%;font-family:monospace;-inkscape-font-specification:monospace;text-anchor:end;stroke-linejoin:round"
+             x="71.483093"
+             y="79.953903"
+             id="text4258"
+             sodipodi:linespacing="125%"><tspan
+                 sodipodi:role="line"
+                 id="tspan4260"
+                 x="71.483093"
+                 y="79.953903">Vcc</tspan></text>
+        <text
+             sodipodi:linespacing="125%"
+             id="text4262"
+             y="104.9539"
+             x="71.483093"
+             style="font-size:14px;line-height:125%;font-family:monospace;-inkscape-font-specification:monospace;text-anchor:end;stroke-linejoin:round"
+             xml:space="preserve"><tspan
+                 y="104.9539"
+                 x="71.483093"
+                 id="tspan4264"
+                 sodipodi:role="line">Tx</tspan></text>
+        <text
+             xml:space="preserve"
+             style="font-size:14px;line-height:125%;font-family:monospace;-inkscape-font-specification:monospace;text-anchor:end;stroke-linejoin:round"
+             x="71.483093"
+             y="129.9539"
+             id="text4266"
+             sodipodi:linespacing="125%"><tspan
+                 sodipodi:role="line"
+                 id="tspan4268"
+                 x="71.483093"
+                 y="129.9539">Rx</tspan></text>
+        <text
+             sodipodi:linespacing="125%"
+             id="text4270"
+             y="154.9539"
+             x="71.483093"
+             style="font-size:14px;line-height:125%;font-family:monospace;-inkscape-font-specification:monospace;text-anchor:end;stroke-linejoin:round"
+             xml:space="preserve"><tspan
+                 y="154.9539"
+                 x="71.483093"
+                 id="tspan4272"
+                 sodipodi:role="line">GND</tspan></text>
+        <path
+             style="color:black;fill:none;fill-rule:evenodd;stroke:black;stroke-width:1.7717;stroke-linecap:butt"
+             d="m 100,100 75,0 0,25"
+             id="path4274"
+             inkscape:connector-curvature="0"
+             sodipodi:nodetypes="ccc" />
+        <path
+             style="color:black;fill:none;fill-rule:evenodd;stroke:black;stroke-width:1.7717;stroke-linecap:butt"
+             d="m 100,150 125,0"
+             id="path4278"
+             inkscape:connector-curvature="0" />
+        <g
+             transform="matrix(0,-1,-1,0,279.7,860.8)"
+             id="g4280">
+            <path
+                 inkscape:connector-curvature="0"
+                 id="path4282"
+                 d="m 764.6,34.7 c 0,2.1 -1.7,3.7 -3.8,3.7 -2.2,0 -3.7,-1.6 -3.7,-3.7 0,-2.1 1.6,-3.8 3.7,-3.8 2.1,0 3.8,1.7 3.8,3.8 z"
+                 style="fill:white;stroke:black;stroke-width:1.7717;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:7" />
+            <path
+                 inkscape:connector-curvature="0"
+                 id="path4284"
+                 d="m 760.8,39.7 0,15"
+                 style="fill:none;stroke:black;stroke-width:1.7717;stroke-miterlimit:7" />
+        </g>
+        <use
+             x="0"
+             y="0"
+             xlink:href="#g4280"
+             id="use4286"
+             transform="translate(0,25)"
+             width="100%"
+             height="100%" />
+        <use
+             height="100%"
+             width="100%"
+             transform="translate(0,50)"
+             id="use4288"
+             xlink:href="#g4280"
+             y="0"
+             x="0" />
+        <text
+             xml:space="preserve"
+             style="font-size:14px;line-height:125%;font-family:monospace;-inkscape-font-specification:monospace;stroke-linejoin:round"
+             x="255"
+             y="105"
+             id="text4290"
+             sodipodi:linespacing="125%"><tspan
+                 sodipodi:role="line"
+                 id="tspan4292"
+                 x="255"
+                 y="105">Vcc</tspan></text>
+        <text
+             xml:space="preserve"
+             style="font-size:14px;line-height:125%;font-family:monospace;-inkscape-font-specification:monospace;stroke-linejoin:round"
+             x="255"
+             y="130"
+             id="text4294"
+             sodipodi:linespacing="125%"><tspan
+                 sodipodi:role="line"
+                 id="tspan4296"
+                 x="255"
+                 y="130">Data</tspan></text>
+        <text
+             xml:space="preserve"
+             style="font-size:14px;line-height:125%;font-family:monospace;-inkscape-font-specification:monospace;stroke-linejoin:round"
+             x="255"
+             y="155"
+             id="text4298"
+             sodipodi:linespacing="125%"><tspan
+                 sodipodi:role="line"
+                 id="tspan4300"
+                 x="255"
+                 y="155">GND</tspan></text>
+        <text
+             xml:space="preserve"
+             style="font-size:18px;line-height:125%;font-family:monospace;-inkscape-font-specification:monospace;text-anchor:middle;stroke-linejoin:round"
+             x="263.55713"
+             y="35"
+             id="text4302"
+             sodipodi:linespacing="125%"><tspan
+                 sodipodi:role="line"
+                 id="tspan4304"
+                 x="263.55713"
+                 y="35">DS18B20</tspan></text>
+        <text
+             sodipodi:linespacing="125%"
+             id="text4310"
+             y="35"
+             x="63.557129"
+             style="font-size:18px;line-height:125%;font-family:monospace;-inkscape-font-specification:monospace;text-anchor:middle;stroke-linejoin:round"
+             xml:space="preserve"><tspan
+                 y="35"
+                 x="63.557129"
+                 id="tspan4312"
+                 sodipodi:role="line">USB/UART</tspan></text>
+        <path
+             style="fill:#babdb6;stroke:black;stroke-width:1.7717;stroke-linejoin:round"
+             d="m 100,125 125,0"
+             id="path4316"
+             inkscape:connector-curvature="0"
+             sodipodi:nodetypes="cc" />
+        <path
+             style="color:black;fill:none;fill-rule:evenodd;stroke:black;stroke-width:1.7717;stroke-linecap:butt"
+             d="m 225,100 -25,0 0,50"
+             id="path3370"
+             inkscape:connector-curvature="0" />
+        <path
+             style="stroke:black"
+             inkscape:connector-curvature="0"
+             id="path3372"
+             d="m 203.8,150.1 c 0,2.1 -1.8,3.7 -3.8,3.7 -2.3,0 -3.8,-1.6 -3.8,-3.7 0,-2.1 1.6,-3.9 3.8,-3.9 2,0 3.8,1.8 3.8,3.9 z" />
+    </g>
+</svg>

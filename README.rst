@@ -70,16 +70,46 @@ Set resolution for DS18B20 and DS1822)::
   sensor.set_resolution(DS18B20.RES_9_BIT)
 
 `digitemp.device` module provides following classes:
-    * `DS18S20` - for DS1820, DS18S20 and DS1920 High-Precision Temperature Sensors (family code: `0x10`);
-    * `DS18B20` - for DS18B20 Programmable Resolution Temperature Sensors (family code: `0x28`);
-    * `DS1822` - for DS1822 Econo Temperature Sensor (family code: `0x22`)
-    * `DS1820`, `DS1920` - are aliases for `DS18S20`
+
+  * `DS18S20` - for DS1820, DS18S20 and DS1920 High-Precision Temperature Sensors (family code: `0x10`);
+  * `DS18B20` - for DS18B20 Programmable Resolution Temperature Sensors (family code: `0x28`);
+  * `DS1822` - for DS1822 Econo Temperature Sensor (family code: `0x22`)
+  * `DS1820`, `DS1920` - are aliases for `DS18S20`
+
+Schematics
+==========
+
+IMPORTANT DISCLAIMER: All circuits presented here are collected from different sources on the Internet and thus are
+provided on an entirely "as-is and no guarantees" basis. We do not provide a warranty of any kind and cannot be held
+responsible in any manner.
 
 1-wire serial port interface
-============================
+----------------------------
 
 See `Serial Port Temperature Sensors - Hardware Interface <http://martybugs.net/electronics/tempsensor/hardware.cgi>`_
 for details.
+
+USB/UART adapter
+----------------
+
+These are tested:
+
+  * [ds18b20-uart.svg](docs/ds18b20-uart.svg)
+  * [ds18b20-uart-par.svg](docs/ds18b20-uart-par.svg)
+  * [ds18b20-uart-dioda.svg](docs/ds18b20-uart-dioda.svg)
+  * [ds18b20-uart-diodapar.svg](docs/ds18b20-uart-diodapar.svg)
+
+Not all schematics work in all cases, depending on adapter and cable length.
+
+These are not tested yet:
+
+  * [ds18b20-uart-mosfet.svg](docs/ds18b20-uart-mosfet.svg)
+  * [ds18b20-uart-npn.svg](docs/ds18b20-uart-npn.svg)
+
+Thanks
+======
+
+  * [Slavko](https://github.com/slavkoja) for SVG schematics and testing.
 
 License
 =======
