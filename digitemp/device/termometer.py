@@ -65,23 +65,18 @@ class OneWireTemperatureSensor(AddressableDevice):
         :return: float, temperature in Celcius
         """
         attempts = attempts if attempts > 1 else 1
-        try:
+        self._reset()
+        self._convert_T()
+        for i in range(attempts):
             self._reset()
-            self._convert_T()
-            for i in range(attempts):
-                self._reset()
-                try:
-                    scratchpad = self._read_scratchpad()
-                    break
-                except CRCError:
-                    pass
-            else:
-                raise CRCError('read_scratchpad: CRC error')
-            return self._calc_temperature(scratchpad)
-
-        except OneWireException as e:
-            print('Temperature sensor (%s) error %s' % (rom2str(self.rom_code), str(e)))
-            return None
+            try:
+                scratchpad = self._read_scratchpad()
+                break
+            except CRCError:
+                pass
+        else:
+            raise CRCError('read_scratchpad: CRC error')
+        return self._calc_temperature(scratchpad)
 
     def convert_T_all(self):
         """
