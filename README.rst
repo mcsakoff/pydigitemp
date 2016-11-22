@@ -11,9 +11,9 @@ to RS232 serial port through DS9097 adapter.
 Documentation used
 ==================
 
-  * `Using an UART to Implement a 1-Wire Bus Master <http://www.maximintegrated.com/en/app-notes/index.mvp/id/214>`_
-  * `Book of iButton® Standards <http://pdfserv.maximintegrated.com/en/an/AN937.pdf>`_ (PDF)
-  * `DS18S20 High-Precision 1-Wire Digital Thermometer <http://datasheets.maximintegrated.com/en/ds/DS18S20.pdf>`_ (PDF)
+* `Using an UART to Implement a 1-Wire Bus Master <http://www.maximintegrated.com/en/app-notes/index.mvp/id/214>`_
+* `Book of iButton® Standards <http://pdfserv.maximintegrated.com/en/an/AN937.pdf>`_ (PDF)
+* `DS18S20 High-Precision 1-Wire Digital Thermometer <http://datasheets.maximintegrated.com/en/ds/DS18S20.pdf>`_ (PDF)
 
 Supported Hardware
 ==================
@@ -21,15 +21,15 @@ Supported Hardware
 Master
 ------
 
-  * `DS9097 <http://www.maximintegrated.com/en/products/comms/ibutton/DS9097.html>`_ - COM port adapter which performs RS-232C level conversion.
-  * Custom 1-wire serial port interface (see below).
+* `DS9097 <http://www.maximintegrated.com/en/products/comms/ibutton/DS9097.html>`_ - COM port adapter which performs RS-232C level conversion.
+* Custom 1-wire serial port interface (see below).
 
 Slave
 -----
 
-  * `DS1820 / DS18S20 / DS1920 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18S20.html>`_ - High-Precision Temperature Sensor.
-  * `DS18B20 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18B20.html>`_ - Programmable Resolution Temperature Sensor.
-  * `DS1822 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS1822.html>`_ - Econo Temperature Sensor.
+* `DS1820 / DS18S20 / DS1920 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18S20.html>`_ - High-Precision Temperature Sensor.
+* `DS18B20 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18B20.html>`_ - Programmable Resolution Temperature Sensor.
+* `DS1822 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS1822.html>`_ - Econo Temperature Sensor.
 
 Usage
 =====
@@ -71,10 +71,10 @@ Set resolution for DS18B20 and DS1822)::
 
 `digitemp.device` module provides following classes:
 
-  * `DS18S20` - for DS1820, DS18S20 and DS1920 High-Precision Temperature Sensors (family code: `0x10`);
-  * `DS18B20` - for DS18B20 Programmable Resolution Temperature Sensors (family code: `0x28`);
-  * `DS1822` - for DS1822 Econo Temperature Sensor (family code: `0x22`)
-  * `DS1820`, `DS1920` - are aliases for `DS18S20`
+* `DS18S20` - for DS1820, DS18S20 and DS1920 High-Precision Temperature Sensors (family code: `0x10`);
+* `DS18B20` - for DS18B20 Programmable Resolution Temperature Sensors (family code: `0x28`);
+* `DS1822` - for DS1822 Econo Temperature Sensor (family code: `0x22`)
+* `DS1820`, `DS1920` - are aliases for `DS18S20`
 
 Schematics
 ==========
@@ -94,22 +94,22 @@ USB/UART adapter
 
 These are tested:
 
-  * [ds18b20-uart.svg](docs/ds18b20-uart.svg)
-  * [ds18b20-uart-par.svg](docs/ds18b20-uart-par.svg)
-  * [ds18b20-uart-dioda.svg](docs/ds18b20-uart-dioda.svg)
-  * [ds18b20-uart-diodapar.svg](docs/ds18b20-uart-diodapar.svg)
+* `ds18b20-uart.svg <docs/ds18b20-uart.svg>`_
+* `ds18b20-uart-par.svg <docs/ds18b20-uart-par.svg>`_
+* `ds18b20-uart-dioda.svg <docs/ds18b20-uart-dioda.svg>`_
+* `ds18b20-uart-diodapar.svg <docs/ds18b20-uart-diodapar.svg>`_
 
 Not all schematics work in all cases, depending on adapter and cable length.
 
 These are not tested yet:
 
-  * [ds18b20-uart-mosfet.svg](docs/ds18b20-uart-mosfet.svg)
-  * [ds18b20-uart-npn.svg](docs/ds18b20-uart-npn.svg)
+* `ds18b20-uart-mosfet.svg <docs/ds18b20-uart-mosfet.svg>`_
+* `ds18b20-uart-npn.svg <docs/ds18b20-uart-npn.svg>`_
 
 Thanks
 ======
 
-  * [Slavko](https://github.com/slavkoja) for SVG schematics and testing.
+* `Slavko <https://github.com/slavkoja>`_ for SVG schematics and testing.
 
 License
 =======
