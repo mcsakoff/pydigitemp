@@ -191,7 +191,7 @@ class DS18S20(OneWireTemperatureSensor):
     @classmethod
     def _calc_temperature(cls, scratchpad, precise=True):
         """
-        Extract temerature value from scratchpad.
+        Extract temperature value from scratchpad.
 
         :param scratchpad: Scratchpad 8-bytes as bytes.
         :return: float, temperature in Celcius
@@ -248,7 +248,7 @@ class DS18B20(OneWireTemperatureSensor):
     @classmethod
     def _calc_temperature(cls, scratchpad):
         """
-        Extract temerature value from scratchpad.
+        Extract temperature value from scratchpad.
 
         :param scratchpad: Scratchpad 8-bytes as bytes.
         :return: float, temperature in Celcius
