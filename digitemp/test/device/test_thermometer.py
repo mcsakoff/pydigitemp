@@ -12,7 +12,7 @@ class DS18S20_TestCase(unittest.TestCase):
             scratchpad[0] = temp_register & 0xff            # LSB
             scratchpad[1] = (temp_register >> 8) & 0xff     # MSB
             scratchpad = bytes(scratchpad)
-            return DS18S20._calc_temperature(scratchpad, precise=False)
+            return DS18S20._s_calc_temperature(scratchpad, precise=False)
 
         self.assertEqual(conv(0x00aa), 85.0)
         self.assertEqual(conv(0x0032), 25.0)

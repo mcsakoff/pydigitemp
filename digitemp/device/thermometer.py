@@ -12,7 +12,7 @@ class OneWireTemperatureSensor(AddressableDevice):
     """
     FAMILY_CODE = 0x00
     T_CONV = 0.750  # temperature conversion time, default value
-    T_RW = 0.010    # eeprom write time, default value
+    T_RW = 0.010  # eeprom write time, default value
 
     def __init__(self, bus, rom=None):
         """
@@ -147,7 +147,7 @@ class OneWireTemperatureSensor(AddressableDevice):
         # parasite powered will pull the bus low and we will get 0x0 on read
         return self.bus.read_bit() == 0b0
 
-     # ---[ Helper Functions ]----
+    # ---[ Helper Functions ]----
 
     def _reset(self):
         """
@@ -182,14 +182,21 @@ class DS18S20(OneWireTemperatureSensor):
     """
     FAMILY_CODE = 0x10
 
+    def __init__(self, bus, rom=None, precise=True):
+        OneWireTemperatureSensor.__init__(self, bus, rom)
+        self.precise = precise
+
     def info(self):
         OneWireTemperatureSensor.info(self)
         self._reset()
         scratchpad = self._read_scratchpad()
         print('Alarms: high = %+d C, low = %+d C' % struct.unpack('bb', scratchpad[2:4]))
 
+    def _calc_temperature(self, scratchpad):
+        return DS18S20._s_calc_temperature(scratchpad, precise=self.precise)
+
     @classmethod
-    def _calc_temperature(cls, scratchpad, precise=True):
+    def _s_calc_temperature(cls, scratchpad, precise=True):
         """
         Extract temperature value from scratchpad.
 
@@ -198,8 +205,8 @@ class DS18S20(OneWireTemperatureSensor):
         """
         temperature = float(struct.unpack('<h', scratchpad[0:2])[0]) / 2.0
         if precise:
-            count_remain = iord(scratchpad, 6)
-            count_per_c = iord(scratchpad, 7)
+            count_remain = float(iord(scratchpad, 6))
+            count_per_c = float(iord(scratchpad, 7))
             temperature = round(int(temperature) - 0.25 + 1.0 * (count_per_c - count_remain) / count_per_c, 2)
         return temperature
 
@@ -229,7 +236,7 @@ class DS18B20(OneWireTemperatureSensor):
     See: http://datasheets.maximintegrated.com/en/ds/DS18B20.pdf
     """
     FAMILY_CODE = 0x28
-    RES_9_BIT  = 0x0
+    RES_9_BIT = 0x0
     RES_10_BIT = 0x1
     RES_11_BIT = 0x2
     RES_12_BIT = 0x3
@@ -251,21 +258,10 @@ class DS18B20(OneWireTemperatureSensor):
         Extract temperature value from scratchpad.
 
         :param scratchpad: Scratchpad 8-bytes as bytes.
-        :return: float, temperature in Celcius
+        :return: float, temperature in Celsius
         """
-        resolution = (iord(scratchpad, 4) >> 5) & 0x3
         temp_register = struct.unpack('<h', scratchpad[0:2])[0]
-        if resolution == DS18B20.RES_12_BIT:
-            temperature = float(temp_register) / 16.0
-        elif resolution == DS18B20.RES_11_BIT:
-            temperature = float(temp_register >> 1) / 8.0
-        elif resolution == DS18B20.RES_10_BIT:
-            temperature = float(temp_register >> 2) / 4.0
-        elif resolution == DS18B20.RES_9_BIT:
-            temperature = float(temp_register >> 3) / 2.0
-        else:
-            raise NotImplementedError()
-        return temperature
+        return float(temp_register) / 16.0
 
     def get_T(self):
         self._reset()
