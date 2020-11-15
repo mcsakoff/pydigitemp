@@ -4,7 +4,7 @@
 #
 import time
 from digitemp.master import UART_Adapter
-from digitemp.device import DS18S20
+from digitemp.device import TemperatureSensor
 from digitemp.exceptions import DeviceError, AdapterError
 
 bus = None
@@ -19,7 +19,7 @@ while True:
         bus = UART_Adapter(device)
         print("Connected to '%s'..." % device)
 
-        sensor = DS18S20(bus, rom=sensID)
+        sensor = TemperatureSensor(bus, rom=sensID)
         # infinite reading loop
         while True:
             try:

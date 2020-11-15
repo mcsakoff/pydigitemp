@@ -4,13 +4,13 @@ import struct
 from ..utils import *
 from ..master import UART_Adapter
 from ..exceptions import CRCError, DeviceError
-from .generic import AddressableDevice
+from .generic import OneWireDevice
 
 if PY3:
     from typing import Optional, Tuple
 
 
-class OneWireTemperatureSensor(AddressableDevice):
+class OneWireTemperatureSensor(OneWireDevice):
     """
     Abstract class for temperature sensors.
     """
@@ -23,17 +23,17 @@ class OneWireTemperatureSensor(AddressableDevice):
         """
         If no ROM code passed we suppose that there is only one 1-wire device on the line!
         """
-        AddressableDevice.__init__(self, bus)
+        OneWireDevice.__init__(self, bus)
         self.t_conv = self.T_CONV
         self.t_rw = self.T_RW
         if rom is None:  # only one 1-wire device connected
             self.single_mode = True
-            self.rom_code = self._read_ROM()
+            self.rom_code = self.bus.read_ROM()
             self.parasitic = self._power_supply()
         else:
             self.single_mode = False
             self.rom_code = str2rom(rom)
-            if not self.is_connected(self.rom_code):
+            if not self.bus.is_connected(self.rom_code):
                 raise DeviceError('Device with ROM code %s not found' % rom2str(self.rom_code))
             self._reset()
             self.parasitic = self._power_supply()
@@ -93,7 +93,7 @@ class OneWireTemperatureSensor(AddressableDevice):
         """
         This forces all temperature sensors to calculate temperature and set/unset alarm flag.
         """
-        self._skip_ROM()
+        self.bus.skip_ROM()
         self.bus.write_byte(0x44)
         # We do not know if there are any DS18B20 or DS1822 on the line and what are their resolution settings.
         # So, we just wait max(T_conv) that is 750ms for currently supported devices.
@@ -127,7 +127,7 @@ class OneWireTemperatureSensor(AddressableDevice):
         # type: (bytes) -> None
         """
         WRITE SCRATCHPAD [4Eh]
-        This command allows the master to write data to the slave's scratchpad.
+        This command allows the master to write data to the device's scratchpad.
         All bytes MUST be written before the master issues a reset.
         """
         self.bus.write_byte(0x4e)
@@ -172,9 +172,9 @@ class OneWireTemperatureSensor(AddressableDevice):
         Send reset pulse, wait for presence and then select the device.
         """
         if self.single_mode:
-            self._skip_ROM()  # because it is single device
+            self.bus.skip_ROM()  # because it is single device
         else:
-            self._match_ROM(self.rom_code)
+            self.bus.match_ROM(self.rom_code)
 
     def _wait(self, sec=0.75):
         # type: (float) -> None

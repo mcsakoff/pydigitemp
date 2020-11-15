@@ -18,14 +18,14 @@ Documentation used
 Supported Hardware
 ==================
 
-Master
-------
+Bus Drivers
+-----------
 
 * `DS9097 <http://www.maximintegrated.com/en/products/comms/ibutton/DS9097.html>`_ - COM port adapter which performs RS-232C level conversion.
 * Custom 1-wire serial port interface (see below).
 
-Slave
------
+1-Wire Devices
+--------------
 
 * `DS1820 / DS18S20 / DS1920 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18S20.html>`_ - High-Precision Temperature Sensor.
 * `DS18B20 <http://www.maximintegrated.com/en/products/analog/sensors-and-sensor-interface/DS18B20.html>`_ - Programmable Resolution Temperature Sensor.
@@ -36,47 +36,49 @@ Usage
 
 Find ROM codes for all connected devices::
 
-  from digitemp.master import UART_Adapter
-  from digitemp.device import AddressableDevice
+    from digitemp.master import UART_Adapter
 
-  print(AddressableDevice(UART_Adapter('/dev/ttyS0')).get_connected_ROMs())
-  # ['108739A80208006F', '10A75CA80208001A']
+    print(UART_Adapter('/dev/ttyS0').get_connected_ROMs())
+    # ['108739A80208006F', '10A75CA80208001A', '2825EA52050000CE']
 
-Get temperature::
+Get temperature when there is only one 1-wire device on the bus::
 
-  from digitemp.master import UART_Adapter
-  from digitemp.device import DS1820
+    from digitemp.master import UART_Adapter
+    from digitemp.device import TemperatureSensor
 
-  bus = UART_Adapter('/dev/ttyS0')  # DS9097 connected to COM1
+    sensor = TemperatureSensor(UART_Adapter('/dev/ttyS0')
+    sensor.info()
+    print(sensor.get_temperature())
 
-  # only one 1-wire device on the bus:
-  sensor = DS1820(bus)
+Get temperature from specific sensor::
 
-  # specify device's ROM code if more than one 1-wire device on the bus:
-  sensor = DS1820(bus, rom='10D67E5B02080037')
+    from digitemp.master import UART_Adapter
+    from digitemp.device import TemperatureSensor
 
-  # display sensor's information
-  sensor.info()
+    bus = UART_Adapter('/dev/ttyS0')
+    sensor = TemperatureSensor(bus, rom='108739A80208006F')
+    sensor.info()
+    print(sensor.get_temperature())
 
-  # get temperature
-  print(sensor.get_temperature())
-  # 25.48
+You can directly instantiate a device class to use its features (e.g.: setting resolution)::
 
-Set resolution for DS18B20 and DS1822)::
+    from digitemp.device import DS18S20
+    sensor = DS18S20(bus, precise=False)
 
-  from digitemp.device import DS18B20
-  sensor = DS18B20(bus)
+or::
 
-  sensor.set_resolution(DS18B20.RES_9_BIT)
+    from digitemp.device import DS18B20
+    sensor = DS18B20(bus)
+    sensor.set_resolution(DS18B20.RES_10_BIT)
 
-See more examples in *examples* directory.
-
-`digitemp.device` module provides following classes:
+`digitemp.device` module provides following device classes:
 
 * `DS18S20` - for DS1820, DS18S20 and DS1920 High-Precision Temperature Sensors (family code: `0x10`);
 * `DS18B20` - for DS18B20 Programmable Resolution Temperature Sensors (family code: `0x28`);
 * `DS1822` - for DS1822 Econo Temperature Sensor (family code: `0x22`)
 * `DS1820`, `DS1920` - are aliases for `DS18S20`
+
+See more examples in *examples* directory.
 
 Schematics
 ==========

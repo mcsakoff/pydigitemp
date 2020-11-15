@@ -1,12 +1,12 @@
 import time
 from digitemp.master import UART_Adapter
-from digitemp.device import AddressableDevice, TemperatureSensor
+from digitemp.device import TemperatureSensor
 from digitemp.exceptions import OneWireException
 
 bus = UART_Adapter('/dev/ttyS0')
 
 sensors = []
-for rom in AddressableDevice(bus).get_connected_ROMs():
+for rom in bus.get_connected_ROMs():
     try:
         sensors.append(TemperatureSensor(bus, rom))
     except OneWireException:

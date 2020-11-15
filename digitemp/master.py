@@ -6,7 +6,7 @@ Properly configured with respect to baud rate, data bits per character, parity a
 a 115,200 bit per second capable UART provides the input and output timing necessary to implement a 1-Wire master.
 The UART produces the 1-Wire reset pulse, as well as read- and write-time slots. The microprocessor simply puts
 one-byte character codes into the UART transmit register to send a 1-Wire 1 or 0 bit and the UART does the work.
-Conversely, the microprocessor reads single-byte character codes corresponding to a 1 or 0 bit read from a 1-Wire slave.
+Conversely, the microprocessor reads single-byte character codes corresponding to a 1 or 0 bit read from a 1-Wire device.
 All 1-Wire bit transfers require the bus master, the UART, to begin the cycle by driving the 1-Wire bus low.
 Therefore, each 1-Wire bit cycle includes a byte transmit and byte receive by the UART. When reading, the received data
 is of interest, when writing, however, the receive byte is discarded. Depending on the UART's read and write first-in,
@@ -19,10 +19,10 @@ For details see:
 import serial
 import platform
 from .utils import *
-from .exceptions import DeviceError, AdapterError
+from .exceptions import DeviceError, AdapterError, CRCError
 
 if PY3:
-    from typing import Optional
+    from typing import Optional, List
 
 if platform.system() == "Windows":
     def fcntl_flock():
@@ -99,6 +99,8 @@ class UART_Adapter(object):
         except Exception as e:
             raise DeviceError(e)
 
+    # ---[ Data Read/Write Methods ]----
+
     def read_bytes(self, size=1):
         # type: (int) -> bytes
         """
@@ -165,7 +167,7 @@ class UART_Adapter(object):
         """
         Read one bit from serial line.
 
-        Writing 0xff starts read time slot. If slave wants to send 0x0 it will pull the bus low
+        Writing 0xff starts read time slot. If device wants to send 0x0 it will pull the bus low
         ad we will read back value < 0xff. Otherwise it is 0x1 was sent.
 
         :return: integer 0x0..0x1
@@ -228,3 +230,129 @@ class UART_Adapter(object):
             return
         else:
             raise AdapterError('Presence error: 0x%02x' % d)
+
+    # ---[ ROM Commands ]----
+
+    def read_ROM(self):
+        # type: () -> bytes
+        """
+        READ ROM [33h]
+
+        This command can only be used when there is one device on the bus. It allows the bus driver to read the
+        device's 64-bit ROM code without using the Search ROM procedure. If this command is used when there
+        is more than one device present on the bus, a data collision will occur when all the devices attempt to
+        respond at the same time.
+        """
+        self.reset()
+        self.write_byte(0x33)
+        rom_code = self.read_bytes(8)
+        crc = crc8(rom_code[0:7])
+        if crc != iord(rom_code, 7):
+            raise CRCError('read_ROM CRC error')
+        return rom_code
+
+    def match_ROM(self, rom_code):
+        # type: (bytes) -> None
+        """
+        MATCH ROM [55h]
+
+        The match ROM command allows to address a specific device on a multidrop or single-drop bus.
+        Only the device that exactly matches the 64-bit ROM code sequence will respond to the function command
+        issued by the master; all other devices on the bus will wait for a reset pulse.
+        """
+        self.reset()
+        self.write_byte(0x55)
+        self.write_bytes(rom_code)
+
+    def skip_ROM(self):
+        # type: () -> None
+        """
+        The master can use this command to address all devices on the bus simultaneously without sending out
+        any ROM code information.
+        """
+        self.reset()
+        self.write_byte(0xcc)
+
+    def search_ROM(self, alarm=False):
+        # type: (bool) -> List[bytes]
+        """
+        SEARCH ROM [F0h]
+        The master learns the ROM codes through a process of elimination that requires the master to perform
+        a Search ROM cycle as many times as necessary to identify all of the devices.
+
+        ALARM SEARCH [ECh]
+        The operation of this command is identical to the operation of the Search ROM command except that
+        only devices with a set alarm flag will respond.
+        """
+        complete_roms = []
+        partial_roms = []
+
+        def search(current_rom=None):
+            if current_rom is None:
+                current_rom = []
+            else:
+                current_rom = current_rom[:]
+            # send search command
+            self.reset()
+            self.write_byte(0xec if alarm else 0xf0)
+            # send known bits
+            for bit in current_rom:
+                self.read_bit()  # skip bitN
+                self.read_bit()  # skip complement of bitN
+                self.write_bit(bit)
+            # read rest of the bits
+            for i in range(64 - len(current_rom)):
+                b1 = self.read_bit()
+                b2 = self.read_bit()
+                if b1 != b2:  # all devices have this bit set to 0 or 1
+                    current_rom.append(b1)
+                    self.write_bit(b1)
+                elif b1 == b2 == 0b0:
+                    # there are two or more devices on the bus with bit 0 and 1 in this position
+                    # save version with 1 as possible rom ...
+                    rom = current_rom[:]
+                    rom.append(0b1)
+                    partial_roms.append(rom)
+                    # ... and proceed with 0
+                    current_rom.append(0b0)
+                    self.write_bit(0b0)
+                else:  # b1 == b2 == 1:
+                    if alarm:
+                        # In alarm search that means there is no more alarming devices
+                        return
+                    else:
+                        raise AdapterError('Search command got wrong bits (two sequential 0b1)')
+            complete_roms.append(bits2rom(current_rom))
+
+        search()
+        while len(partial_roms):
+            search(partial_roms.pop())
+
+        return complete_roms
+
+    # ---[ Helper Functions ]----
+
+    def get_connected_ROMs(self):
+        # type: () -> List[str]
+        roms = self.search_ROM(alarm=False)
+        return [rom2str(rom) for rom in roms]
+
+    def alarm_search(self):
+        # type: () -> List[str]
+        roms = self.search_ROM(alarm=True)
+        return [rom2str(rom) for rom in roms]
+
+    def is_connected(self, rom_code):
+        # type: (bytes) -> bool
+        """
+        :return: True if a device with the ROM connected to the bus.
+        """
+        self.reset()
+        self.write_byte(0xf0)
+        for bit in rom2bits(rom_code):
+            b1 = self.read_bit()
+            b2 = self.read_bit()
+            if b1 == b2 == 0b1:
+                return False
+            self.write_bit(bit)
+        return True
