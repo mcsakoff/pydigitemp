@@ -10,9 +10,9 @@ class OneWireDevice(object):
     """
     TYPES = {
         0x01: 'DS2401 - Silicon Serial Number',
-        0x10: 'DS18S20 - High-precision Digital Termometer',
-        0x22: 'DS1822 - Econo Digital Termometer',
-        0x28: 'DS18B20 - Programmable Resolution Digital Termometer',
+        0x10: 'DS18S20 - High-precision Digital Thermometer',
+        0x22: 'DS1822 - Econo Digital Thermometer',
+        0x28: 'DS18B20 - Programmable Resolution Digital Thermometer',
     }
 
     def __init__(self, bus):

@@ -16,7 +16,7 @@ class OneWireTemperatureSensor(AddressableDevice):
 
     def __init__(self, bus, rom=None):
         """
-        If no ROM code passed we suppose that thare is only one 1-wire device on the line!
+        If no ROM code passed we suppose that there is only one 1-wire device on the line!
         """
         AddressableDevice.__init__(self, bus)
         self.t_conv = self.T_CONV
@@ -59,10 +59,10 @@ class OneWireTemperatureSensor(AddressableDevice):
     def get_temperature(self, attempts=3):
         """
         Initiates a single temperature conversion then read scratchpad memory
-        and caculate the temperature.
+        and calculates the temperature.
 
         :param attempts: retry on CRC errors
-        :return: float, temperature in Celcius
+        :return: float, temperature in Celsius
         """
         attempts = attempts if attempts > 1 else 1
         self._reset()
@@ -194,7 +194,7 @@ class DS18S20(OneWireTemperatureSensor):
         Extract temperature value from scratchpad.
 
         :param scratchpad: Scratchpad 8-bytes as bytes.
-        :return: float, temperature in Celcius
+        :return: float, temperature in Celsius
         """
         temperature = float(struct.unpack('<h', scratchpad[0:2])[0]) / 2.0
         if precise:

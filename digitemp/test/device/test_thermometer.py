@@ -1,6 +1,6 @@
 import unittest
 
-from digitemp.device.termometer import DS18S20, DS18B20
+from digitemp.device.thermometer import DS18S20, DS18B20
 
 
 class DS18S20_TestCase(unittest.TestCase):
