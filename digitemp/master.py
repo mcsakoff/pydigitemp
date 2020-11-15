@@ -18,10 +18,24 @@ For details see:
 """
 
 import serial
-import fcntl
-
+import platform
 from .utils import *
 from .exceptions import DeviceError, AdapterError
+
+if platform.system() == "Windows":
+    def fcntl_flock():
+        pass
+
+    def fcntl_funlock():
+        pass
+else:
+    import fcntl
+
+    def fcntl_flock(fh):
+        fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+    def fcntl_funlock(fh):
+        fcntl.flock(fh, fcntl.LOCK_UN)
 
 
 class UART_Adapter(object):
@@ -51,7 +65,7 @@ class UART_Adapter(object):
     def _lock(self):
         if self.uart.is_open:
             try:
-                fcntl.flock(self.uart.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                fcntl_flock(self.uart.fileno())
                 self.locked = True
             except IOError:  # Already locked
                 raise DeviceError('Cannot lock serial port: %s' % self.name)
@@ -62,7 +76,7 @@ class UART_Adapter(object):
         """
         if self.locked:
             try:
-                fcntl.flock(self.uart.fileno(), fcntl.LOCK_UN)
+                fcntl_funlock(self.uart.fileno())
             except IOError:
                 raise DeviceError('Cannot unlock serial port: %s' % self.name)
             self.locked = False

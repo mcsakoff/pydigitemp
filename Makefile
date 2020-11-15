@@ -26,7 +26,7 @@ package:
 	@bin/python setup.py sdist
 
 ## release: Upload a package to pypi.org
-release: dist/$(PROJECT)-$(VERSION).tar.gz bin/twine package
+release: dist/py$(PROJECT)-$(VERSION).tar.gz bin/twine package
 	@echo "$(GRN)--> Uploading package $(PROJECT) $(VERSION)$(END)"
 	@bin/twine upload $<
 
