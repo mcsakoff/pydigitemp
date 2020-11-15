@@ -76,6 +76,8 @@ Set resolution for DS18B20 and DS1822)::
 * `DS1822` - for DS1822 Econo Temperature Sensor (family code: `0x22`)
 * `DS1820`, `DS1920` - are aliases for `DS18S20`
 
+See more examples in *examples* directory.
+
 Schematics
 ==========
 
