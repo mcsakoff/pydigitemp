@@ -9,7 +9,7 @@ one-byte character codes into the UART transmit register to send a 1-Wire 1 or 0
 Conversely, the microprocessor reads single-byte character codes corresponding to a 1 or 0 bit read from a 1-Wire slave.
 All 1-Wire bit transfers require the bus master, the UART, to begin the cycle by driving the 1-Wire bus low.
 Therefore, each 1-Wire bit cycle includes a byte transmit and byte receive by the UART. When reading, the received data
-is of interest, when writing, however, the receive byte is discarded. Depending on the UART's read and write firstin,
+is of interest, when writing, however, the receive byte is discarded. Depending on the UART's read and write first-in,
 first-out (FIFO) buffer depth, the UART can also frame 1-Wire bits into byte values further reducing the processor
 overhead.
 
@@ -28,9 +28,12 @@ class UART_Adapter(object):
 
     def __init__(self, port, timeout=3):
         self.locked = False
-        self.uart = serial.Serial(port, timeout=timeout)
+        try:
+            self.uart = serial.Serial(port, timeout=timeout)
+            self.uart.dtr = True
+        except Exception as e:
+            raise DeviceError(e)
         self._lock()
-        self.uart.dtr = True
 
     @property
     def name(self):
@@ -39,8 +42,11 @@ class UART_Adapter(object):
     def close(self):
         if self.uart.is_open:
             self._unlock()
-            self.uart.dtr = False
-            self.uart.close()
+            try:
+                self.uart.dtr = False
+                self.uart.close()
+            except Exception as e:
+                raise DeviceError(e)
 
     def _lock(self):
         if self.uart.is_open:
@@ -55,19 +61,25 @@ class UART_Adapter(object):
         Un-lock serial port
         """
         if self.locked:
-            fcntl.flock(self.uart.fileno(), fcntl.LOCK_UN)
+            try:
+                fcntl.flock(self.uart.fileno(), fcntl.LOCK_UN)
+            except IOError:
+                raise DeviceError('Cannot unlock serial port: %s' % self.name)
             self.locked = False
 
     def clear(self):
         """
-        Clear imput and output buffers. Just in case.
+        Clear input and output buffers. Just in case.
         """
-        self.uart.reset_input_buffer()
-        self.uart.reset_output_buffer()
+        try:
+            self.uart.reset_input_buffer()
+            self.uart.reset_output_buffer()
+        except Exception as e:
+            raise DeviceError(e)
 
     def read_bytes(self, size=1):
         """
-        Read N bytes from searial line.
+        Read N bytes from serial line.
         :param size: integer
         :return: bytes
         """
@@ -90,8 +102,11 @@ class UART_Adapter(object):
         :return: integer 0x00..0xff
         """
         self.clear()
-        self.uart.write(b'\xff\xff\xff\xff\xff\xff\xff\xff')
-        data = self.uart.read(8)
+        try:
+            self.uart.write(b'\xff\xff\xff\xff\xff\xff\xff\xff')
+            data = self.uart.read(8)
+        except Exception as e:
+            return DeviceError(e)
         if len(data) != 8:
             raise AdapterError('Read error')
         value = 0
@@ -112,8 +127,11 @@ class UART_Adapter(object):
             data >>= 1
         bits = bytesarray2bytes(bits)
         self.clear()
-        self.uart.write(bits)
-        back = self.uart.read(8)
+        try:
+            self.uart.write(bits)
+            back = self.uart.read(8)
+        except Exception as e:
+            return DeviceError(e)
         if len(back) != 8:
             raise AdapterError('Write error')
         if bits != back:
@@ -129,8 +147,11 @@ class UART_Adapter(object):
         :return: integer 0x0..0x1
         """
         self.clear()
-        self.uart.write(b'\xff')
-        b = self.uart.read(1)
+        try:
+            self.uart.write(b'\xff')
+            b = self.uart.read(1)
+        except Exception as e:
+            return DeviceError(e)
         if len(b) != 1:
             raise AdapterError('Read error')
         value = bord(b)
@@ -141,14 +162,17 @@ class UART_Adapter(object):
         Write one bit to serial line.
 
         0xff - writes 0x1, 0x00 writes 0x0. Read-back value shall match the value we write.
-        Otherwise someone elese was writing to the bus at the same time.
+        Otherwise someone else was writing to the bus at the same time.
 
         :param bit: integer 0x0..0x1
         """
         bit = b'\xff' if bit else b'\x00'
         self.clear()
-        self.uart.write(bit)
-        back = self.uart.read(1)
+        try:
+            self.uart.write(bit)
+            back = self.uart.read(1)
+        except Exception as e:
+            return DeviceError(e)
         if len(back) != 1:
             raise AdapterError('Write error')
         if bit != back:
@@ -156,19 +180,25 @@ class UART_Adapter(object):
 
     def reset(self):
         """
-        Reset and presense detect.
+        Reset and presence detect.
         """
         self.clear()
-        self.uart.baudrate = 9600
-        self.uart.write(b'\xf0')
-        b = self.uart.read(1)
+        try:
+            self.uart.baudrate = 9600
+            self.uart.write(b'\xf0')
+            b = self.uart.read(1)
+        except Exception as e:
+            return DeviceError(e)
         if len(b) != 1:
             raise AdapterError('Read/Write error')
         d = bord(b)
-        self.uart.baudrate = 115200
+        try:
+            self.uart.baudrate = 115200
+        except Exception as e:
+            return DeviceError(e)
         if d == 0xf0:
-            raise DeviceError('No 1-wire device present')
+            raise AdapterError('No 1-wire device present')
         elif 0x10 <= d <= 0xe0:
             return
         else:
-            raise DeviceError('Presence error: 0x%02x' % d)
+            raise AdapterError('Presence error: 0x%02x' % d)
