@@ -16,11 +16,13 @@ overhead.
 For details see:
     Using an UART to Implement a 1-Wire Bus Master (http://www.maximintegrated.com/en/app-notes/index.mvp/id/214)
 """
-
 import serial
 import platform
 from .utils import *
 from .exceptions import DeviceError, AdapterError
+
+if PY3:
+    from typing import Optional
 
 if platform.system() == "Windows":
     def fcntl_flock():
@@ -41,6 +43,7 @@ else:
 class UART_Adapter(object):
 
     def __init__(self, port, timeout=3):
+        # type: (str, Optional[float]) -> None
         self.locked = False
         try:
             self.uart = serial.Serial(port, timeout=timeout)
@@ -51,9 +54,11 @@ class UART_Adapter(object):
 
     @property
     def name(self):
+        # type: () -> str
         return self.uart.name
 
     def close(self):
+        # type: () -> None
         if self.uart.is_open:
             self._unlock()
             try:
@@ -63,6 +68,7 @@ class UART_Adapter(object):
                 raise DeviceError(e)
 
     def _lock(self):
+        # type: () -> None
         if self.uart.is_open:
             try:
                 fcntl_flock(self.uart.fileno())
@@ -71,6 +77,7 @@ class UART_Adapter(object):
                 raise DeviceError('Cannot lock serial port: %s' % self.name)
 
     def _unlock(self):
+        # type: () -> None
         """
         Un-lock serial port
         """
@@ -82,6 +89,7 @@ class UART_Adapter(object):
             self.locked = False
 
     def clear(self):
+        # type: () -> None
         """
         Clear input and output buffers. Just in case.
         """
@@ -92,10 +100,9 @@ class UART_Adapter(object):
             raise DeviceError(e)
 
     def read_bytes(self, size=1):
+        # type: (int) -> bytes
         """
         Read N bytes from serial line.
-        :param size: integer
-        :return: bytes
         """
         data = []
         for i in range(size):
@@ -103,14 +110,15 @@ class UART_Adapter(object):
         return bytesarray2bytes(data)
 
     def write_bytes(self, data):
+        # type: (bytes) -> None
         """
         Write bytes to serial line.
-        :param data: bytes
         """
         for d in iterbytes(data):
             self.write_byte(d)
 
     def read_byte(self):
+        # type: () -> int
         """
         Read one byte from serial line. Same as read_bit but for 8-bits.
         :return: integer 0x00..0xff
@@ -120,7 +128,7 @@ class UART_Adapter(object):
             self.uart.write(b'\xff\xff\xff\xff\xff\xff\xff\xff')
             data = self.uart.read(8)
         except Exception as e:
-            return DeviceError(e)
+            raise DeviceError(e)
         if len(data) != 8:
             raise AdapterError('Read error')
         value = 0
@@ -131,6 +139,7 @@ class UART_Adapter(object):
         return value
 
     def write_byte(self, data):
+        # type: (int) -> None
         """
         Write one byte to serial line. Same as write_bit but for 8-bits.
         :param data: integer 0x00..0xff
@@ -145,13 +154,14 @@ class UART_Adapter(object):
             self.uart.write(bits)
             back = self.uart.read(8)
         except Exception as e:
-            return DeviceError(e)
+            raise DeviceError(e)
         if len(back) != 8:
             raise AdapterError('Write error')
         if bits != back:
             raise AdapterError('Noise on the line detected')
 
     def read_bit(self):
+        # type: () -> int
         """
         Read one bit from serial line.
 
@@ -165,13 +175,14 @@ class UART_Adapter(object):
             self.uart.write(b'\xff')
             b = self.uart.read(1)
         except Exception as e:
-            return DeviceError(e)
+            raise DeviceError(e)
         if len(b) != 1:
             raise AdapterError('Read error')
         value = bord(b)
         return 0b1 if value == 0xff else 0b0
 
     def write_bit(self, bit):
+        # type: (int) -> None
         """
         Write one bit to serial line.
 
@@ -186,13 +197,14 @@ class UART_Adapter(object):
             self.uart.write(bit)
             back = self.uart.read(1)
         except Exception as e:
-            return DeviceError(e)
+            raise DeviceError(e)
         if len(back) != 1:
             raise AdapterError('Write error')
         if bit != back:
             raise AdapterError('Noise on the line detected')
 
     def reset(self):
+        # type: () -> None
         """
         Reset and presence detect.
         """
@@ -202,14 +214,14 @@ class UART_Adapter(object):
             self.uart.write(b'\xf0')
             b = self.uart.read(1)
         except Exception as e:
-            return DeviceError(e)
+            raise DeviceError(e)
         if len(b) != 1:
             raise AdapterError('Read/Write error')
         d = bord(b)
         try:
             self.uart.baudrate = 115200
         except Exception as e:
-            return DeviceError(e)
+            raise DeviceError(e)
         if d == 0xf0:
             raise AdapterError('No 1-wire device present')
         elif 0x10 <= d <= 0xe0:

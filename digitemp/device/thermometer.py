@@ -2,8 +2,12 @@ import time
 import struct
 
 from ..utils import *
-from ..exceptions import OneWireException, CRCError, DeviceError
+from ..master import UART_Adapter
+from ..exceptions import CRCError, DeviceError
 from .generic import AddressableDevice
+
+if PY3:
+    from typing import Optional, Tuple
 
 
 class OneWireTemperatureSensor(AddressableDevice):
@@ -15,6 +19,7 @@ class OneWireTemperatureSensor(AddressableDevice):
     T_RW = 0.010  # eeprom write time, default value
 
     def __init__(self, bus, rom=None):
+        # type: (UART_Adapter, Optional[str]) -> None
         """
         If no ROM code passed we suppose that there is only one 1-wire device on the line!
         """
@@ -38,12 +43,14 @@ class OneWireTemperatureSensor(AddressableDevice):
 
     @property
     def rom(self):
+        # type: () -> str
         """
         :return: ROM code in human readable format
         """
         return rom2str(self.rom_code)
 
     def info(self):
+        # type: () -> None
         print('Bus: %s' % self.bus.name)
         print('Device: %s' % self._device_name(self.FAMILY_CODE))
         print('ROM Code: %s' % self.rom)
@@ -51,12 +58,15 @@ class OneWireTemperatureSensor(AddressableDevice):
         print('Connection Mode: %s' % ('single-drop' if self.single_mode else 'multidrop'))
 
     def save_eeprom(self):
+        # type: () -> None
         self._copy_scratchpad()
 
     def load_eeprom(self):
+        # type: () -> None
         self._recall()
 
     def get_temperature(self, attempts=3):
+        # type: (int) -> float
         """
         Initiates a single temperature conversion then read scratchpad memory
         and calculates the temperature.
@@ -79,6 +89,7 @@ class OneWireTemperatureSensor(AddressableDevice):
         return self._calc_temperature(scratchpad)
 
     def convert_T_all(self):
+        # type: () -> None
         """
         This forces all temperature sensors to calculate temperature and set/unset alarm flag.
         """
@@ -91,6 +102,7 @@ class OneWireTemperatureSensor(AddressableDevice):
     # ---[ Function Commands ]----
 
     def _convert_T(self):
+        # type: () -> None
         """
         CONVERT T [44h]
         This command initiates a single temperature conversion.
@@ -99,6 +111,7 @@ class OneWireTemperatureSensor(AddressableDevice):
         self._wait(self.t_conv)
 
     def _read_scratchpad(self):
+        # type: () -> bytes
         """
         READ SCRATCHPAD [BEh]
         This command allows the master to read the contents of the scratchpad.
@@ -111,6 +124,7 @@ class OneWireTemperatureSensor(AddressableDevice):
         return raw
 
     def _write_scratchpad(self, raw):
+        # type: (bytes) -> None
         """
         WRITE SCRATCHPAD [4Eh]
         This command allows the master to write data to the slave's scratchpad.
@@ -120,6 +134,7 @@ class OneWireTemperatureSensor(AddressableDevice):
         self.bus.write_bytes(raw)
 
     def _copy_scratchpad(self):
+        # type: () -> None
         """
         COPY SCRATCHPAD [48h]
         This command copies the contents of the scratchpad to EEPROM.
@@ -128,6 +143,7 @@ class OneWireTemperatureSensor(AddressableDevice):
         self._wait(self.t_rw)
 
     def _recall(self):
+        # type: () -> None
         """
         RECALL EE [B8h]
         This command recalls values from EEPROM and places the data in the scratchpad memory.
@@ -137,6 +153,7 @@ class OneWireTemperatureSensor(AddressableDevice):
             self._wait()
 
     def _power_supply(self):
+        # type: () -> bool
         """
         READ POWER SUPPLY [B4h]
         The master device issues this command to determine if devices on the bus are using parasite power.
@@ -150,6 +167,7 @@ class OneWireTemperatureSensor(AddressableDevice):
     # ---[ Helper Functions ]----
 
     def _reset(self):
+        # type: () -> None
         """
         Send reset pulse, wait for presence and then select the device.
         """
@@ -159,6 +177,7 @@ class OneWireTemperatureSensor(AddressableDevice):
             self._match_ROM(self.rom_code)
 
     def _wait(self, sec=0.75):
+        # type: (float) -> None
         """
         Wait for specified time in parasitic mode or until operation is finished in external power mode.
         """
@@ -169,6 +188,7 @@ class OneWireTemperatureSensor(AddressableDevice):
                 pass
 
     def _calc_temperature(self, scratchpad):
+        # type: (bytes)-> float
         """
         Calculate temperature from the scratchpad
         """
@@ -183,20 +203,25 @@ class DS18S20(OneWireTemperatureSensor):
     FAMILY_CODE = 0x10
 
     def __init__(self, bus, rom=None, precise=True):
+        # type: (UART_Adapter, Optional[str], bool) -> None
         OneWireTemperatureSensor.__init__(self, bus, rom)
         self.precise = precise
 
     def info(self):
+        # type: () -> None
         OneWireTemperatureSensor.info(self)
         self._reset()
         scratchpad = self._read_scratchpad()
         print('Alarms: high = %+d C, low = %+d C' % struct.unpack('bb', scratchpad[2:4]))
+        print('Resolution: %s' % ('extended' if self.precise else '9 bits'))
 
     def _calc_temperature(self, scratchpad):
+        # type: (bytes) -> float
         return DS18S20._s_calc_temperature(scratchpad, precise=self.precise)
 
     @classmethod
     def _s_calc_temperature(cls, scratchpad, precise=True):
+        # type: (bytes, bool) -> float
         """
         Extract temperature value from scratchpad.
 
@@ -211,11 +236,13 @@ class DS18S20(OneWireTemperatureSensor):
         return temperature
 
     def get_T(self):
+        # type: () -> Tuple[int,int]
         self._reset()
         scratchpad = self._read_scratchpad()
         return struct.unpack('bb', scratchpad[2:4])
 
     def set_T(self, high=None, low=None):
+        # type: (Optional[int], Optional[int]) -> None
         if low is None or high is None:
             old_high, old_low = self.get_T()
         else:
@@ -242,10 +269,12 @@ class DS18B20(OneWireTemperatureSensor):
     RES_12_BIT = 0x3
 
     def __init__(self, bus, rom=None):
+        # type: (UART_Adapter, Optional[bytes]) -> None
         OneWireTemperatureSensor.__init__(self, bus, rom)
         self._set_tconv(self.get_resolution())
 
     def info(self):
+        # type: () -> None
         OneWireTemperatureSensor.info(self)
         self._reset()
         scratchpad = self._read_scratchpad()
@@ -254,6 +283,7 @@ class DS18B20(OneWireTemperatureSensor):
 
     @classmethod
     def _calc_temperature(cls, scratchpad):
+        # type: (bytes) -> float
         """
         Extract temperature value from scratchpad.
 
@@ -264,11 +294,13 @@ class DS18B20(OneWireTemperatureSensor):
         return float(temp_register) / 16.0
 
     def get_T(self):
+        # type: () -> Tuple[int,int]
         self._reset()
         scratchpad = self._read_scratchpad()
         return struct.unpack('bb', scratchpad[2:4])
 
     def set_T(self, high=None, low=None):
+        # type: (Optional[int], Optional[int]) -> None
         self._reset()
         scratchpad = self._read_scratchpad()
         if low is None or high is None:
@@ -282,11 +314,13 @@ class DS18B20(OneWireTemperatureSensor):
         self._write_scratchpad(raw)
 
     def get_resolution(self):
+        # type: () -> int
         self._reset()
         scratchpad = self._read_scratchpad()
         return (iord(scratchpad, 4) >> 5) & 0b11
 
     def set_resolution(self, resolution):
+        # type: (int) -> None
         resolution &= 0b11
         self._reset()
         scratchpad = self._read_scratchpad()
@@ -300,6 +334,7 @@ class DS18B20(OneWireTemperatureSensor):
         self._set_tconv(resolution)
 
     def _set_tconv(self, resolution):
+        # type: (int) -> None
         self.t_conv = self.T_CONV / (8 >> resolution)
 
 

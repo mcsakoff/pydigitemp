@@ -1,5 +1,9 @@
 from ..utils import *
+from ..master import UART_Adapter
 from ..exceptions import OneWireException, CRCError
+
+if PY3:
+    from typing import List
 
 __all__ = ['AddressableDevice']
 
@@ -16,10 +20,12 @@ class OneWireDevice(object):
     }
 
     def __init__(self, bus):
+        # type: (UART_Adapter) -> None
         self.bus = bus
 
     @classmethod
     def _device_name(cls, family_code):
+        # type: (int) -> str
         return OneWireDevice.TYPES.get(family_code, 'Unknown 1-Wire device')
 
 
@@ -31,6 +37,7 @@ class AddressableDevice(OneWireDevice):
     # ---[ ROM Commands ]----
 
     def _read_ROM(self):
+        # type: () -> bytes
         """
         READ ROM [33h]
 
@@ -48,6 +55,7 @@ class AddressableDevice(OneWireDevice):
         return rom_code
 
     def _match_ROM(self, rom_code):
+        # type: (bytes) -> None
         """
         MATCH ROM [55h]
 
@@ -60,6 +68,7 @@ class AddressableDevice(OneWireDevice):
         self.bus.write_bytes(rom_code)
 
     def _skip_ROM(self):
+        # type: () -> None
         """
         The master can use this command to address all devices on the bus simultaneously without sending out
         any ROM code information.
@@ -68,6 +77,7 @@ class AddressableDevice(OneWireDevice):
         self.bus.write_byte(0xcc)
 
     def _search_ROM(self, alarm=False):
+        # type: (bool) -> List[bytes]
         """
         SEARCH ROM [F0h]
         The master learns the ROM codes through a process of elimination that requires the master to perform
@@ -126,14 +136,17 @@ class AddressableDevice(OneWireDevice):
     # ---[ Helper Functions ]----
 
     def get_connected_ROMs(self):
+        # type: () -> List[str]
         roms = self._search_ROM(alarm=False)
         return [rom2str(rom) for rom in roms]
 
     def alarm_search(self):
+        # type: () -> List[str]
         roms = self._search_ROM(alarm=True)
         return [rom2str(rom) for rom in roms]
 
     def is_connected(self, rom_code):
+        # type: (bytes) -> bool
         """
         :return: True if a device with the ROM connected to the bus.
         """
