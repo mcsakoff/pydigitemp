@@ -1,5 +1,6 @@
 import time
 import struct
+import warnings
 
 from ..utils import *
 from ..master import UART_Adapter
@@ -77,6 +78,13 @@ class OneWireTemperatureSensor(OneWireDevice):
         attempts = attempts if attempts > 1 else 1
         self._reset()
         self._convert_T()
+        return self.read_temperature(attempts=attempts)
+
+    def read_temperature(self, attempts=3):
+        # type: (int) -> float
+        """
+        Read scratchpad memory and calculates the temperature.
+        """
         for i in range(attempts):
             self._reset()
             try:
@@ -90,14 +98,8 @@ class OneWireTemperatureSensor(OneWireDevice):
 
     def convert_T_all(self):
         # type: () -> None
-        """
-        This forces all temperature sensors to calculate temperature and set/unset alarm flag.
-        """
-        self.bus.skip_ROM()
-        self.bus.write_byte(0x44)
-        # We do not know if there are any DS18B20 or DS1822 on the line and what are their resolution settings.
-        # So, we just wait max(T_conv) that is 750ms for currently supported devices.
-        time.sleep(self.T_CONV)
+        warnings.warn("deprecated", DeprecationWarning)
+        return self.bus.measure_temperature_all()
 
     # ---[ Function Commands ]----
 

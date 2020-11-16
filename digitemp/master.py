@@ -16,6 +16,7 @@ overhead.
 For details see:
     Using an UART to Implement a 1-Wire Bus Master (http://www.maximintegrated.com/en/app-notes/index.mvp/id/214)
 """
+import time
 import serial
 import platform
 from .utils import *
@@ -237,7 +238,6 @@ class UART_Adapter(object):
         # type: () -> bytes
         """
         READ ROM [33h]
-
         This command can only be used when there is one device on the bus. It allows the bus driver to read the
         device's 64-bit ROM code without using the Search ROM procedure. If this command is used when there
         is more than one device present on the bus, a data collision will occur when all the devices attempt to
@@ -255,7 +255,6 @@ class UART_Adapter(object):
         # type: (bytes) -> None
         """
         MATCH ROM [55h]
-
         The match ROM command allows to address a specific device on a multidrop or single-drop bus.
         Only the device that exactly matches the 64-bit ROM code sequence will respond to the function command
         issued by the master; all other devices on the bus will wait for a reset pulse.
@@ -267,6 +266,7 @@ class UART_Adapter(object):
     def skip_ROM(self):
         # type: () -> None
         """
+        SKIP ROM [CCh]
         The master can use this command to address all devices on the bus simultaneously without sending out
         any ROM code information.
         """
@@ -329,6 +329,17 @@ class UART_Adapter(object):
             search(partial_roms.pop())
 
         return complete_roms
+
+    def measure_temperature_all(self):
+        # type: () -> None
+        """
+        This forces all temperature sensors to calculate temperature and set/unset alarm flag.
+        """
+        self.skip_ROM()
+        self.write_byte(0x44)
+        # We do not know if there are any DS18B20 or DS1822 on the line and what are their resolution settings.
+        # So, we just wait max(T_conv) that is 750ms for currently supported devices.
+        time.sleep(0.75)
 
     # ---[ Helper Functions ]----
 
