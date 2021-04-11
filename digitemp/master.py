@@ -25,13 +25,7 @@ from .exceptions import DeviceError, AdapterError, CRCError
 if PY3:
     from typing import Optional, List
 
-if platform.system() == "Windows":
-    def fcntl_flock():
-        pass
-
-    def fcntl_funlock():
-        pass
-else:
+if platform.system() != "Windows":
     import fcntl
 
     def fcntl_flock(fh):
@@ -70,9 +64,11 @@ class UART_Adapter(object):
 
     def _lock(self):
         # type: () -> None
-        if self.uart.is_open:
+        if platform.system() == "Windows":
+            pass
+        elif self.uart.is_open:
             try:
-                fcntl_flock(self.uart.fileno())
+                fcntl_flock(self.uart.fileno()) # on Windows, serial.Serial.fileno() raises an UnsupportedOperation error
                 self.locked = True
             except IOError:  # Already locked
                 raise DeviceError('Cannot lock serial port: %s' % self.name)
@@ -82,9 +78,11 @@ class UART_Adapter(object):
         """
         Un-lock serial port
         """
-        if self.locked:
+        if platform.system() == "Windows":
+            pass
+        elif self.locked:
             try:
-                fcntl_funlock(self.uart.fileno())
+                fcntl_funlock(self.uart.fileno()) # on Windows, serial.Serial.fileno() raises an UnsupportedOperation error
             except IOError:
                 raise DeviceError('Cannot unlock serial port: %s' % self.name)
             self.locked = False
