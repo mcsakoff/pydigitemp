@@ -46,7 +46,7 @@ Get temperature when there is only one 1-wire device on the bus::
     from digitemp.master import UART_Adapter
     from digitemp.device import TemperatureSensor
 
-    sensor = TemperatureSensor(UART_Adapter('/dev/ttyS0')
+    sensor = TemperatureSensor(UART_Adapter('/dev/ttyS0'))
     sensor.info()
     print(sensor.get_temperature())
 
