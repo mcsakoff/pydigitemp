@@ -15,7 +15,7 @@ __temperatureSensors = {
 
 def TemperatureSensor(bus, rom=None):
     """
-    If rom is not, will try to find a connected device.
+    If rom is not set, will try to find a connected device.
     In that case there must be only one device connected.
     """
     # type: (UART_Adapter, Optional[str]) -> OneWireTemperatureSensor
